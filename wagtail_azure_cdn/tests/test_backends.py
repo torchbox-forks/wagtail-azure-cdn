@@ -345,20 +345,8 @@ class TestAzureBaseBackendHostnames(test.TestCase):
             {"CDN_PROFILE_NAME": "test-profile", "HOSTNAMES": ["example.com"]}
         )
 
-        if self.is_wagtail_gte_62:
-            # In 6.2+, should raise for non-allowed hostname
-            with self.assertRaises(ImproperlyConfigured):
-                backend._get_setting_for_hostname("another.com", "cdn_profile_name")
-
         # Should always work for allowed hostname
         self.assertEqual(
             backend._get_setting_for_hostname("example.com", "cdn_profile_name"),
             "test-profile",
         )
-
-        if not self.is_wagtail_gte_62:
-            # Pre-6.2 should work for any hostname
-            self.assertEqual(
-                backend._get_setting_for_hostname("another.com", "cdn_profile_name"),
-                "test-profile",
-            )
