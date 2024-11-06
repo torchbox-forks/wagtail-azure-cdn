@@ -23,8 +23,8 @@ env:
   PIP_NO_PYTHON_VERSION_WARNING: "1"
 
 jobs:
-  quality:
-    name: Code Quality
+  formatting:
+    name: Linting & Formatting
     runs-on: ubuntu-latest
 
     steps:
@@ -51,7 +51,7 @@ jobs:
         run: python -Im tox -e isort
 
   test:
-    needs: quality # Make this job wait for quality checks to pass
+    needs: formatting # Make this job wait for linter/formatter checks to pass
     name: Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
 
