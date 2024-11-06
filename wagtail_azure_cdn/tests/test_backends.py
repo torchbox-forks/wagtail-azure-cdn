@@ -1,6 +1,8 @@
 from django import test
 from django.core.exceptions import ImproperlyConfigured
 
+from wagtail import VERSION as WAGTAIL_VERSION
+
 from faker import Faker
 
 from wagtail_azure_cdn.backends import AzureCdnBackend, AzureFrontDoorBackend
@@ -296,3 +298,69 @@ class TestAzureFrontDoorBackend(test.TestCase):
             len([item for sublist in filtered_urls.values() for item in sublist]),
             len(fake_urls),
         )
+
+
+class TestAzureBaseBackendHostnames(test.TestCase):
+    def setUp(self):
+        self.is_wagtail_gte_62 = WAGTAIL_VERSION >= (6, 2)
+
+    def test_hostname_validation(self):
+        """Test hostname validation behavior"""
+        backend = AzureCdnBackend(
+            {"CDN_PROFILE_NAME": "test-profile", "HOSTNAMES": ["example.com"]}
+        )
+
+        # All hostnames should work pre-6.2, but be restricted in 6.2+
+        if self.is_wagtail_gte_62:
+            self.assertTrue(backend.invalidates_hostname("example.com"))
+            self.assertFalse(backend.invalidates_hostname("another.com"))
+        else:
+            self.assertTrue(backend.invalidates_hostname("example.com"))
+            self.assertTrue(backend.invalidates_hostname("another.com"))
+
+    def test_url_filtering(self):
+        """Test URL filtering behavior"""
+        backend = AzureCdnBackend(
+            {"CDN_PROFILE_NAME": "test-profile", "HOSTNAMES": ["example.com"]}
+        )
+        urls = [
+            "https://example.com/path1",
+            "https://another.com/path2",
+            "https://example.com/path3",
+        ]
+        filtered = backend._filter_urls_by_hostname(urls)
+
+        if self.is_wagtail_gte_62:
+            # In 6.2+, only example.com URLs should be included
+            self.assertEqual(list(filtered.keys()), ["example.com"])
+            self.assertEqual(len(filtered["example.com"]), 2)
+            self.assertEqual(filtered["example.com"], ["/path1", "/path3"])
+        else:
+            # Pre-6.2, all URLs should be included
+            self.assertEqual(sorted(filtered.keys()), ["another.com", "example.com"])
+            self.assertEqual(len(filtered["example.com"]), 2)
+            self.assertEqual(len(filtered["another.com"]), 1)
+
+    def test_settings_hostname_validation(self):
+        """Test settings retrieval with hostname validation"""
+        backend = AzureCdnBackend(
+            {"CDN_PROFILE_NAME": "test-profile", "HOSTNAMES": ["example.com"]}
+        )
+
+        if self.is_wagtail_gte_62:
+            # In 6.2+, should raise for non-allowed hostname
+            with self.assertRaises(ImproperlyConfigured):
+                backend._get_setting_for_hostname("another.com", "cdn_profile_name")
+
+        # Should always work for allowed hostname
+        self.assertEqual(
+            backend._get_setting_for_hostname("example.com", "cdn_profile_name"),
+            "test-profile",
+        )
+
+        if not self.is_wagtail_gte_62:
+            # Pre-6.2 should work for any hostname
+            self.assertEqual(
+                backend._get_setting_for_hostname("another.com", "cdn_profile_name"),
+                "test-profile",
+            )

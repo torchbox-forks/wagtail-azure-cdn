@@ -6,12 +6,20 @@ from urllib.parse import urlparse
 
 from django.core.exceptions import ImproperlyConfigured
 
+from wagtail import VERSION as WAGTAIL_VERSION
 from wagtail.contrib.frontend_cache.backends import BaseBackend
 
 logger = logging.getLogger("wagtail_azure_cdn")
 
 
 class AzureBaseBackend(BaseBackend):
+    def __init__(self, params: Mapping[str, Any]):
+        if WAGTAIL_VERSION >= (6, 2):
+            # New Wagtail 6.2+ version
+            super().__init__(params)
+        else:
+            pass
+
     def _get_setting_for_hostname(
         self, hostname: str, setting: str, raise_exception: bool = True
     ) -> Any:
