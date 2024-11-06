@@ -83,9 +83,11 @@ class AzureFrontDoorBackend(AzureBaseBackend):
             hostname, "frontdoor_service_url", raise_exception=False
         )
         return FrontDoorManagementClient(
-            credential=azure_credentials()
-            if callable(azure_credentials)
-            else azure_credentials,
+            credential=(
+                azure_credentials()
+                if callable(azure_credentials)
+                else azure_credentials
+            ),
             subscription_id=azure_subscription_id,
             base_url=azure_frontdoor_service_url,
         )
@@ -150,9 +152,11 @@ class AzureCdnBackend(AzureBaseBackend):
             hostname, "cdn_service_url", raise_exception=False
         )
         return CdnManagementClient(
-            credential=azure_credentials()
-            if callable(azure_credentials)
-            else azure_credentials,
+            credential=(
+                azure_credentials()
+                if callable(azure_credentials)
+                else azure_credentials
+            ),
             subscription_id=azure_subscription_id,
             base_url=azure_cdn_service_url,
         )
