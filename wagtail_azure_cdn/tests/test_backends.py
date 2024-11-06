@@ -1,6 +1,8 @@
 from django import test
 from django.core.exceptions import ImproperlyConfigured
 
+from wagtail import VERSION as WAGTAIL_VERSION
+
 from faker import Faker
 
 from wagtail_azure_cdn.backends import AzureCdnBackend, AzureFrontDoorBackend
@@ -295,4 +297,33 @@ class TestAzureFrontDoorBackend(test.TestCase):
         self.assertEqual(
             len([item for sublist in filtered_urls.values() for item in sublist]),
             len(fake_urls),
+        )
+
+
+class TestAzureBaseBackendHostnames(test.TestCase):
+    def setUp(self):
+        self.is_wagtail_gte_62 = WAGTAIL_VERSION >= (6, 2)
+
+    def test_hostname_validation(self):
+        """Test hostname validation behavior"""
+        backend = AzureCdnBackend(
+            {"CDN_PROFILE_NAME": "test-profile", "HOSTNAMES": ["example.com"]}
+        )
+
+        if self.is_wagtail_gte_62:
+            self.assertTrue(backend.invalidates_hostname("example.com"))
+            self.assertFalse(backend.invalidates_hostname("another.com"))
+        else:
+            self.assertFalse(hasattr(backend, "invalidates_hostname"))
+
+    def test_settings_hostname_validation(self):
+        """Test settings retrieval with hostname validation"""
+        backend = AzureCdnBackend(
+            {"CDN_PROFILE_NAME": "test-profile", "HOSTNAMES": ["example.com"]}
+        )
+
+        # Should always work for allowed hostname
+        self.assertEqual(
+            backend._get_setting_for_hostname("example.com", "cdn_profile_name"),
+            "test-profile",
         )

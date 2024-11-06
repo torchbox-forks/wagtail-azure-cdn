@@ -6,12 +6,20 @@ from urllib.parse import urlparse
 
 from django.core.exceptions import ImproperlyConfigured
 
+from wagtail import VERSION as WAGTAIL_VERSION
 from wagtail.contrib.frontend_cache.backends import BaseBackend
 
 logger = logging.getLogger("wagtail_azure_cdn")
 
 
 class AzureBaseBackend(BaseBackend):
+    def __init__(self, params: Mapping[str, Any]):
+        if WAGTAIL_VERSION >= (6, 2):
+            # https://github.com/wagtail/wagtail/blob/stable/6.2.x/wagtail/contrib/frontend_cache/backends/base.py
+            super().__init__(params)
+        else:
+            pass
+
     def _get_setting_for_hostname(
         self, hostname: str, setting: str, raise_exception: bool = True
     ) -> Any:
@@ -64,6 +72,8 @@ class AzureBaseBackend(BaseBackend):
 
 class AzureFrontDoorBackend(AzureBaseBackend):
     def __init__(self, params: Mapping[str, Any]):
+        super().__init__(params)
+
         if importlib.util.find_spec("azure.mgmt.frontdoor") is None:
             raise RuntimeError("Install azure-mgmt-frontdoor.")
         self._global_config = self._parse_config(params)
@@ -83,9 +93,11 @@ class AzureFrontDoorBackend(AzureBaseBackend):
             hostname, "frontdoor_service_url", raise_exception=False
         )
         return FrontDoorManagementClient(
-            credential=azure_credentials()
-            if callable(azure_credentials)
-            else azure_credentials,
+            credential=(
+                azure_credentials()
+                if callable(azure_credentials)
+                else azure_credentials
+            ),
             subscription_id=azure_subscription_id,
             base_url=azure_frontdoor_service_url,
         )
@@ -121,6 +133,8 @@ class AzureFrontDoorBackend(AzureBaseBackend):
 
 class AzureCdnBackend(AzureBaseBackend):
     def __init__(self, params: Mapping[str, Any]):
+        super().__init__(params)
+
         if importlib.util.find_spec("azure.mgmt.cdn") is None:
             raise RuntimeError("Install azure-mgmt-cdn.")
         self._global_config = self._parse_config(params)
@@ -150,9 +164,11 @@ class AzureCdnBackend(AzureBaseBackend):
             hostname, "cdn_service_url", raise_exception=False
         )
         return CdnManagementClient(
-            credential=azure_credentials()
-            if callable(azure_credentials)
-            else azure_credentials,
+            credential=(
+                azure_credentials()
+                if callable(azure_credentials)
+                else azure_credentials
+            ),
             subscription_id=azure_subscription_id,
             base_url=azure_cdn_service_url,
         )
