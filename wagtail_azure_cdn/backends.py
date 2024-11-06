@@ -72,6 +72,8 @@ class AzureBaseBackend(BaseBackend):
 
 class AzureFrontDoorBackend(AzureBaseBackend):
     def __init__(self, params: Mapping[str, Any]):
+        super().__init__(params)
+
         if importlib.util.find_spec("azure.mgmt.frontdoor") is None:
             raise RuntimeError("Install azure-mgmt-frontdoor.")
         self._global_config = self._parse_config(params)
@@ -131,6 +133,8 @@ class AzureFrontDoorBackend(AzureBaseBackend):
 
 class AzureCdnBackend(AzureBaseBackend):
     def __init__(self, params: Mapping[str, Any]):
+        super().__init__(params)
+
         if importlib.util.find_spec("azure.mgmt.cdn") is None:
             raise RuntimeError("Install azure-mgmt-cdn.")
         self._global_config = self._parse_config(params)
