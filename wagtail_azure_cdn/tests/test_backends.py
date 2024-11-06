@@ -310,13 +310,11 @@ class TestAzureBaseBackendHostnames(test.TestCase):
             {"CDN_PROFILE_NAME": "test-profile", "HOSTNAMES": ["example.com"]}
         )
 
-        # All hostnames should work pre-6.2, but be restricted in 6.2+
         if self.is_wagtail_gte_62:
             self.assertTrue(backend.invalidates_hostname("example.com"))
             self.assertFalse(backend.invalidates_hostname("another.com"))
         else:
-            self.assertTrue(backend.invalidates_hostname("example.com"))
-            self.assertTrue(backend.invalidates_hostname("another.com"))
+            self.assertFalse(hasattr(backend, "invalidates_hostname"))
 
     def test_url_filtering(self):
         """Test URL filtering behavior"""
