@@ -15,7 +15,7 @@ logger = logging.getLogger("wagtail_azure_cdn")
 class AzureBaseBackend(BaseBackend):
     def __init__(self, params: Mapping[str, Any]):
         if WAGTAIL_VERSION >= (6, 2):
-            # New Wagtail 6.2+ version
+            # https://github.com/wagtail/wagtail/blob/stable/6.2.x/wagtail/contrib/frontend_cache/backends/base.py
             super().__init__(params)
         else:
             pass

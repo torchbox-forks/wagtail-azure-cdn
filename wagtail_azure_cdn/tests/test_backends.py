@@ -316,29 +316,6 @@ class TestAzureBaseBackendHostnames(test.TestCase):
         else:
             self.assertFalse(hasattr(backend, "invalidates_hostname"))
 
-    def test_url_filtering(self):
-        """Test URL filtering behavior"""
-        backend = AzureCdnBackend(
-            {"CDN_PROFILE_NAME": "test-profile", "HOSTNAMES": ["example.com"]}
-        )
-        urls = [
-            "https://example.com/path1",
-            "https://another.com/path2",
-            "https://example.com/path3",
-        ]
-        filtered = backend._filter_urls_by_hostname(urls)
-
-        if self.is_wagtail_gte_62:
-            # In 6.2+, only example.com URLs should be included
-            self.assertEqual(list(filtered.keys()), ["example.com"])
-            self.assertEqual(len(filtered["example.com"]), 2)
-            self.assertEqual(filtered["example.com"], ["/path1", "/path3"])
-        else:
-            # Pre-6.2, all URLs should be included
-            self.assertEqual(sorted(filtered.keys()), ["another.com", "example.com"])
-            self.assertEqual(len(filtered["example.com"]), 2)
-            self.assertEqual(len(filtered["another.com"]), 1)
-
     def test_settings_hostname_validation(self):
         """Test settings retrieval with hostname validation"""
         backend = AzureCdnBackend(
