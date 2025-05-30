@@ -60,7 +60,6 @@ INSTALLED_APPS = (
     "wagtail.contrib.redirects",
     "wagtail.contrib.search_promotions",
     "wagtail.contrib.settings",
-    "wagtail.contrib.modeladmin",
     "wagtail.contrib.table_block",
     "wagtail.contrib.forms",
     "wagtail.search",
@@ -72,7 +71,7 @@ INSTALLED_APPS = (
     "wagtail.documents",
     "wagtail.admin",
     "wagtail.api.v2",
-    "wagtail.core",
+    "wagtail",
     "taggit",
     "rest_framework",
     "django.contrib.admin",
@@ -82,6 +81,7 @@ INSTALLED_APPS = (
     "django.contrib.messages",
     "django.contrib.sitemaps",
     "django.contrib.staticfiles",
+    "wagtail_modeladmin",
 )
 
 
