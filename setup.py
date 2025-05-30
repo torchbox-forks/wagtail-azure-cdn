@@ -20,9 +20,9 @@ setup(
     author_email="hi@tmkn.org",
     version=__version__,
     packages=find_packages(),
-    install_requires=["wagtail"],
+    install_requires=["wagtail>=5.2"],
     extras_require={
-        "testing": ["flake8", "black", "isort", "faker"],
+        "testing": ["flake8", "black", "isort", "faker", "wagtail-modeladmin"],
         "cdn": ["azure-mgmt-cdn>=1,<2"],
         "frontdoor": ["azure-mgmt-frontdoor>=1,<2"],
     },
