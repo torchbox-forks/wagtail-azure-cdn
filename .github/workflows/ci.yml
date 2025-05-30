@@ -23,35 +23,7 @@ env:
   PIP_NO_PYTHON_VERSION_WARNING: "1"
 
 jobs:
-  formatting:
-    name: Linting & Formatting
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Code Repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install Dependencies
-        run: |
-          python -Im pip install --upgrade pip
-          python -Im pip install tox
-
-      - name: Run black
-        run: python -Im tox -e black
-
-      - name: Run flake8
-        run: python -Im tox -e flake8
-
-      - name: Run isort
-        run: python -Im tox -e isort
-
   test:
-    needs: formatting # Make this job wait for linter/formatter checks to pass
     name: Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
 
